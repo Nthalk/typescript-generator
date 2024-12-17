@@ -56,6 +56,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>11</java.version>
         <kotlin.version>1.9.10</kotlin.version>
+        <immutables.version>2.9.3</immutables.version>
         <github.global.server>github</github.global.server>
     </properties>
 
@@ -172,6 +173,13 @@
                         <arg>-Xlint</arg>
                         <arg>-parameters</arg>
                     </compilerArgs>
+                    <annotationProcessorPaths>
+                        <dependency>
+                            <groupId>org.immutables</groupId>
+                            <artifactId>value</artifactId>
+                            <version>${immutables.version}</version>
+                        </dependency>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
             <plugin>
