@@ -108,11 +108,11 @@ public class Jackson2Parser extends ModelParser {
     }
 
     public static class JaxbParserFactory extends Jackson2ParserFactory {
-        
+
         public JaxbParserFactory() {
             super(true);
         }
-        
+
     }
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -423,12 +423,22 @@ public class Jackson2Parser extends ModelParser {
     private boolean isTaggedUnion(Pair<Class<?>, JsonTypeInfo> classWithJsonTypeInfo) {
         final Class<?> cls = classWithJsonTypeInfo.getValue1();
         final JsonTypeInfo jsonTypeInfo = classWithJsonTypeInfo.getValue2();
-        if (cls == null || Utils.hasAnyAnnotation(cls::getAnnotation, settings.disableTaggedUnionAnnotations)) {
+        if (cls == null || Utils.hasAnyAnnotation(cls::getAnnotation, settings.disableTaggedUnionAnnotations) || jsonTypeInfo == null) {
             return false;
         }
-        return jsonTypeInfo != null &&
-                (jsonTypeInfo.include() == JsonTypeInfo.As.PROPERTY || jsonTypeInfo.include() == JsonTypeInfo.As.EXISTING_PROPERTY) &&
-                (jsonTypeInfo.use() == JsonTypeInfo.Id.NAME || jsonTypeInfo.use() == JsonTypeInfo.Id.CLASS);
+        // We only support PROPERTY and EXISTING_PROPERTY for tagged unions
+        if(jsonTypeInfo.include() != JsonTypeInfo.As.PROPERTY && jsonTypeInfo.include() != JsonTypeInfo.As.EXISTING_PROPERTY) {
+            return false;
+        }
+        // We don't support NONE, DEDUCTION, or CUSTOM for tagged unions
+        if(
+            jsonTypeInfo.use() == JsonTypeInfo.Id.NONE ||
+            jsonTypeInfo.use() == JsonTypeInfo.Id.DEDUCTION ||
+            jsonTypeInfo.use() == JsonTypeInfo.Id.CUSTOM
+        ) {
+            return false;
+        }
+        return true;
     }
 
     private boolean isDiscriminantPropertySynthetic(JsonTypeInfo jsonTypeInfo) {
